@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Takanawa Guest Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <style>
+    :root {
+      --nav-h:            56px;
+      --color-bg:         #F7F3EC;
+      --color-surface:    #FFFFFF;
+      --color-ink:        #1A1F3C;
+      --color-muted:      #6B7280;
+      --color-gold:       #C9A84C;
+      --color-open:       #22863A;
+      --color-closed:     #D73A49;
+      --color-temple:     #4B5BA6;
+      --color-shrine:     #3A8A60;
+      --color-landmark:   #5C6B7A;
+      --color-restaurant: #B07D2A;
+      --color-bar:        #7B3FA0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-ink);
+      line-height: 1.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration:  0.01ms !important;
+      }
+    }
+
+    /* ── NAV ──────────────────────────────────────────────── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--color-surface);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-logo {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--color-ink);
+      white-space: nowrap;
+    }
+
+    .lang-btn {
+      background: none;
+      border: 1px solid #D1CBC0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-muted);
+      padding: 0.22rem 0.6rem;
+      transition: color 150ms ease, border-color 150ms ease;
+      white-space: nowrap;
+    }
+    .lang-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
+    .lang-btn:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+
+    .nav-filters {
+      display: flex;
+      gap: 0.1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--color-muted);
+      padding: 0.4rem 0.7rem;
+      border-radius: 4px 4px 0 0;
+      transition: color 150ms ease, border-color 150ms ease;
+    }
+    .filter-btn:hover  { color: var(--color-ink); }
+    .filter-btn.active { color: var(--color-ink); border-bottom-color: var(--color-gold); }
+    .filter-btn:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+
+    /* ── SPLIT LAYOUT ─────────────────────────────────────── */
+    .layout {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 1024px) {
+      .layout {
+        flex-direction: row;
+        height: calc(100vh - var(--nav-h));
+        overflow: hidden;
+      }
+    }
+
+    /* ── MAP PANEL ────────────────────────────────────────── */
+    .map-panel {
+      width: 100%;
+      height: 380px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .map-panel {
+        flex: 0 0 60%;
+        height: 100%;
+      }
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    /* ── LIST PANEL ───────────────────────────────────────── */
+    .list-panel {
+      flex: 1;
+      background: var(--color-bg);
+    }
+
+    @media (min-width: 1024px) {
+      .list-panel {
+        overflow-y: auto;
+        height: 100%;
+      }
+    }
+
+    /* ── LIST INTRO ───────────────────────────────────────── */
+    .list-intro {
+      padding: 1.4rem 1.25rem 0.9rem;
+      border-bottom: 1px solid #e5e0d8;
+    }
+
+    .list-intro h1 {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 600;
+      font-size: 1.45rem;
+      color: var(--color-ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .list-intro .sub {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .list-intro .intro {
+      font-size: 0.86rem;
+      color: var(--color-ink);
+      line-height: 1.65;
+    }
+
+    /* ── CARD GRID ────────────────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+    }
+
+    /* ── CARD ─────────────────────────────────────────────── */
+    .card {
+      background: var(--color-surface);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-left: 4px solid transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+      scroll-margin-top: 16px;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+    }
+
+    .card:focus-visible {
+      outline: 2px solid var(--color-gold);
+      outline-offset: 2px;
+    }
+
+    .card[data-category="temple"]     { border-left-color: var(--color-temple); }
+    .card[data-category="shrine"]     { border-left-color: var(--color-shrine); }
+    .card[data-category="landmark"]   { border-left-color: var(--color-landmark); }
+    .card[data-category="restaurant"] { border-left-color: var(--color-restaurant); }
+    .card[data-category="bar"]        { border-left-color: var(--color-bar); }
+
+    .card.hidden { display: none; }
+
+    .card.map-active {
+      box-shadow: 0 0 0 2px var(--color-gold), 0 6px 20px rgba(0,0,0,0.12);
+      transform: translateY(-1px);
+    }
+
+    /* ── OWNER BANNER ─────────────────────────────────────── */
+    .owner-banner {
+      background: var(--color-gold);
+      color: #fff;
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.3rem 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── CARD BODY ────────────────────────────────────────── */
+    .card-body {
+      padding: 0.9rem 1rem 0.7rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-name {
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 600;
+      font-size: 0.93rem;
+      color: var(--color-ink);
+      line-height: 1.4;
+      margin-bottom: 0.15rem;
+    }
+
+    .card-namejp {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .walk-pill {
+      display: inline-block;
+      background: #F0EDE8;
+      color: var(--color-muted);
+      font-size: 0.71rem;
+      font-weight: 500;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      margin-bottom: 0.55rem;
+      width: fit-content;
+    }
+
+    /* ── HOURS BADGE ──────────────────────────────────────── */
+    .card-hours { margin-bottom: 0.55rem; }
+
+    .hours-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      margin-bottom: 0.25rem;
+    }
+    .hours-pill.open   { background: #DCFCE7; color: var(--color-open); }
+    .hours-pill.closed { background: #FFE4E6; color: var(--color-closed); }
+
+    .hours-today {
+      font-size: 0.72rem;
+      color: var(--color-muted);
+      margin-bottom: 0.1rem;
+    }
+
+    .hours-note {
+      font-size: 0.69rem;
+      color: var(--color-muted);
+      font-style: italic;
+    }
+
+    /* ── RATINGS ──────────────────────────────────────────── */
+    .ratings {
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.77rem;
+    }
+    .rating-google  { color: var(--color-ink); }
+    .rating-tabelog { color: var(--color-ink); }
+    .rating-count { color: var(--color-muted); font-size: 0.71rem; }
+    .rating-note  { font-size: 0.69rem; color: var(--color-muted); font-style: italic; }
+
+    /* ── CUISINE & BUDGET ─────────────────────────────────── */
+    .card-cuisine { font-size: 0.73rem; color: var(--color-muted); margin-bottom: 0.18rem; }
+    .card-budget  { font-size: 0.74rem; color: var(--color-ink);   margin-bottom: 0.4rem; }
+
+    /* ── SHORT DESC ───────────────────────────────────────── */
+    .short-desc {
+      font-size: 0.79rem;
+      color: var(--color-muted);
+      font-style: italic;
+      line-height: 1.5;
+      margin-top: auto;
+      padding-top: 0.35rem;
+    }
+    .card.expanded .short-desc { display: none; }
+
+    /* ── EXPANDABLE SECTION ───────────────────────────────── */
+    .card-expand {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms ease;
+    }
+    .card.expanded .card-expand { max-height: 900px; }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--color-ink);
+      line-height: 1.7;
+      margin-bottom: 0.6rem;
+      padding-top: 0.4rem;
+    }
+    .card-tip {
+      font-size: 0.79rem;
+      color: var(--color-muted);
+      font-style: italic;
+      margin-bottom: 0.65rem;
+    }
+    .card-links { display: flex; flex-direction: column; gap: 0.35rem; padding-bottom: 0.2rem; }
+
+    .card-link {
+      font-size: 0.79rem;
+      color: var(--color-gold);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .card-link:hover { text-decoration: underline; }
+    .card-link:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; border-radius: 2px; }
+
+    /* ── CARD FOOTER ──────────────────────────────────────── */
+    .card-footer {
+      border-top: 1px solid #f0ede8;
+      padding: 0.45rem 1rem 0.5rem;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-gold);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .toggle-btn:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1.25rem;
+      border-top: 1px solid #e5e0d8;
+      color: var(--color-muted);
+      font-size: 0.78rem;
+      line-height: 1.9;
+    }
+
+    /* ── LEAFLET POPUP OVERRIDES ──────────────────────────── */
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.18) !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+    .leaflet-popup-content { margin: 0 !important; }
+    .leaflet-popup-tip-container { margin-top: -1px; }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ─────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <span class="nav-logo" id="nav-logo">Takanawa Guest Guide</span>
+        <button class="lang-btn" id="lang-btn" aria-label="Switch language">日本語</button>
+      </div>
+      <div class="nav-filters" role="group" aria-label="Filter spots by category">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="temple-shrine">Temples &amp; Shrines</button>
+        <button class="filter-btn" data-filter="landmark">Landmarks</button>
+        <button class="filter-btn" data-filter="food">Restaurants &amp; Bars</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── SPLIT LAYOUT ─────────────────────────────────────── -->
+  <div class="layout">
+
+    <div class="map-panel">
+      <div id="map"></div>
+    </div>
+
+    <div class="list-panel" id="list-panel">
+      <div class="list-intro">
+        <h1 id="list-title">Your Neighbourhood</h1>
+        <p class="sub" id="list-sub">港区高輪3-10-38 · Takanawadai Station</p>
+        <p class="intro" id="list-intro">Everything worth knowing within walking distance — hidden temples, neighbourhood restaurants, and one bar your host happens to own.</p>
+      </div>
+      <div class="card-grid" id="card-grid" role="list"></div>
+      <footer class="site-footer">
+        <p id="footer-l1">Made with ❤️ for our guests · 港区高輪3-10-38</p>
+        <p id="footer-l2">Hours are shown in Japan Standard Time (JST)</p>
+      </footer>
+    </div>
+
+  </div>
+
+  <script src="spots.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    'use strict';
+
+    /* ── Language strings ───────────────────────────────────── */
+
+    var STRINGS = {
+      en: {
+        navTitle:     'Takanawa Guest Guide',
+        filterAll:    'All',
+        filterTemple: 'Temples & Shrines',
+        filterLand:   'Landmarks',
+        filterFood:   'Restaurants & Bars',
+        listTitle:    'Your Neighbourhood',
+        listSub:      '港区高輪3-10-38 · Takanawadai Station',
+        listIntro:    'Everything worth knowing within walking distance — hidden temples, neighbourhood restaurants, and one bar your host happens to own.',
+        openNow:      'Open now',
+        closedNow:    'Closed now',
+        todayPfx:     'Today: ',
+        todayClosed:  'Today: Closed',
+        moreBtn:      '▼ More',
+        lessBtn:      '▲ Less',
+        ownerBanner:  "⭐ Owner's Pick — Your host's bar!",
+        mapsLink:     'Open in Google Maps ↗',
+        reviews:      'reviews',
+        homeLabel:    'Your Accommodation',
+        footerL1:     'Made with ❤️ for our guests · 港区高輪3-10-38',
+        footerL2:     'Hours are shown in Japan Standard Time (JST)',
+        langBtn:      '日本語',
+      },
+      ja: {
+        navTitle:     '高輪ゲストガイド',
+        filterAll:    'すべて',
+        filterTemple: '寺社',
+        filterLand:   '観光スポット',
+        filterFood:   '飲食店・バー',
+        listTitle:    'ご近所マップ',
+        listSub:      '港区高輪3-10-38 · 高輪台駅',
+        listIntro:    '徒歩圏内の名所をご紹介します。隠れた寺社、ご近所のレストラン、そして宿のオーナーが営むバー。',
+        openNow:      '営業中',
+        closedNow:    '営業時間外',
+        todayPfx:     '本日: ',
+        todayClosed:  '本日: 定休日',
+        moreBtn:      '▼ 詳細',
+        lessBtn:      '▲ 閉じる',
+        ownerBanner:  '⭐ オーナーのおすすめ — 宿のご主人のバーです！',
+        mapsLink:     'Google マップで開く ↗',
+        reviews:      '件',
+        homeLabel:    'お宿',
+        footerL1:     'ゲストの皆様へ愛を込めて · 港区高輪3-10-38',
+        footerL2:     '営業時間は日本標準時（JST）で表示しています',
+        langBtn:      'English',
+      },
+    };
+
+    /* ── Constants ──────────────────────────────────────────── */
+
+    var REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var CAT_COLORS = {
+      temple:     '#4B5BA6',
+      shrine:     '#3A8A60',
+      landmark:   '#5C6B7A',
+      restaurant: '#B07D2A',
+      bar:        '#7B3FA0',
+    };
+
+    var SPOTS_SORTED = window.SPOTS.slice().sort(function(a, b) {
+      return (b.ownerPick ? 1 : 0) - (a.ownerPick ? 1 : 0);
+    });
+
+    /* ── State ──────────────────────────────────────────────── */
+
+    var lang          = 'en';
+    var currentFilter = 'all';
+    var currentlyOpen = null;
+    var leafletMap    = null;
+    var homeMarker    = null;
+    var markers       = {};
+
+    /* ── Utilities ──────────────────────────────────────────── */
+
+    function fmtHHMM(n) {
+      return String(Math.floor(n / 100)).padStart(2, '0') + ':' + String(n % 100).padStart(2, '0');
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function s() { return STRINGS[lang]; }
+
+    /* ── Hours logic ────────────────────────────────────────── */
+
+    function isOpenNow(spot) {
+      var now  = new Date();
+      var jst  = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      var day  = jst.getUTCDay();
+      var hhmm = jst.getUTCHours() * 100 + jst.getUTCMinutes();
+      var slots = spot.hours[day];
+      if (!slots) return { open: false, slots: null };
+      var open = false;
+      for (var i = 0; i < slots.length; i++) {
+        var o = slots[i][0], c = slots[i][1];
+        if (c > 2400 ? (hhmm >= o || hhmm < c - 2400) : (hhmm >= o && hhmm < c)) {
+          open = true; break;
+        }
+      }
+      return { open: open, slots: slots };
+    }
+
+    function buildBadgeHTML(spot) {
+      var r = isOpenNow(spot);
+      var str = s();
+      var todayStr = r.slots
+        ? str.todayPfx + r.slots.map(function(p) { return fmtHHMM(p[0]) + '–' + fmtHHMM(p[1]); }).join(', ')
+        : str.todayClosed;
+      var note = lang === 'ja' ? (spot.hoursNoteJP || spot.hoursNote) : spot.hoursNote;
+      return (
+        '<span class="hours-pill ' + (r.open ? 'open' : 'closed') + '">● ' +
+        (r.open ? str.openNow : str.closedNow) + '</span>' +
+        '<div class="hours-today">' + esc(todayStr) + '</div>' +
+        (note ? '<div class="hours-note">' + esc(note) + '</div>' : '')
+      );
+    }
+
+    /* ── Map ────────────────────────────────────────────────── */
+
+    function makeIcon(spot) {
+      var size     = spot.ownerPick ? 36 : 30;
+      var half     = size / 2;
+      var fontSize = spot.ownerPick ? '18px' : '15px';
+      var border   = spot.ownerPick
+        ? 'border:2.5px solid #C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,0.4),0 3px 10px rgba(0,0,0,0.25)'
+        : 'border:1.5px solid rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.22)';
+      return L.divIcon({
+        className: '',
+        html: '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;' +
+              'background:rgba(255,255,255,0.96);' + border + ';' +
+              'display:flex;align-items:center;justify-content:center;' +
+              'font-size:' + fontSize + ';line-height:1">' +
+              (spot.emoji || '📍') +
+              '</div>',
+        iconSize:    [size, size],
+        iconAnchor:  [half, half],
+        popupAnchor: [0, -half - 6],
+      });
+    }
+
+    function makePopupHTML(spot) {
+      var r     = isOpenNow(spot);
+      var str   = s();
+      var color = CAT_COLORS[spot.category] || '#6B7280';
+      var emoji = spot.emoji || '📍';
+      var displayName = lang === 'ja' ? spot.nameJP : spot.name;
+      var displaySub  = lang === 'ja' ? spot.name   : spot.nameJP;
+      var displayWalk = lang === 'ja' ? (spot.walkJP || spot.walk) : spot.walk;
+
+      var media;
+      if (spot.photo) {
+        media =
+          '<img src="' + esc(spot.photo) + '" alt="' + esc(spot.name) + '" ' +
+          'style="width:100%;height:130px;object-fit:cover;display:block" ' +
+          'onerror="this.style.display=\'none\'">';
+      } else {
+        media =
+          '<div style="height:100px;display:flex;align-items:center;justify-content:center;' +
+          'background:linear-gradient(135deg,' + color + '20 0%,' + color + '42 100%)">' +
+          '<span style="font-size:2.4rem;opacity:0.75">' + emoji + '</span>' +
+          '</div>';
+      }
+
+      return (
+        '<div style="font-family:Inter,sans-serif;width:236px">' +
+          media +
+          '<div style="padding:10px 13px 13px">' +
+            '<div style="font-weight:600;font-size:0.88rem;color:#1A1F3C;line-height:1.35;margin-bottom:2px">' +
+              esc(displayName) +
+            '</div>' +
+            '<div style="font-size:0.71rem;color:#6B7280;margin-bottom:9px">' + esc(displaySub) + '</div>' +
+            '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px">' +
+              '<span style="font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;' +
+                'background:' + (r.open ? '#DCFCE7' : '#FFE4E6') + ';' +
+                'color:'      + (r.open ? '#22863A' : '#D73A49') + '">' +
+                '● ' + (r.open ? str.openNow : str.closedNow) +
+              '</span>' +
+              '<span style="font-size:0.71rem;color:#6B7280;white-space:nowrap">🚶 ' + esc(displayWalk) + '</span>' +
+            '</div>' +
+            '<a href="' + esc(spot.googleMapsUrl) + '" target="_blank" rel="noopener noreferrer" ' +
+              'style="font-size:0.75rem;color:#C9A84C;font-weight:500;text-decoration:none">' +
+              str.mapsLink +
+            '</a>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function getHomePopupHTML() {
+      return (
+        '<div style="font-family:Inter,sans-serif">' +
+          '<div style="font-weight:600;font-size:0.82rem;color:#1A1F3C">' + s().homeLabel + '</div>' +
+          '<div style="font-size:0.7rem;color:#6B7280">港区高輪3-10-38</div>' +
+        '</div>'
+      );
+    }
+
+    function initMap() {
+      leafletMap = L.map('map', { center: [35.6322, 139.7316], zoom: 15, zoomControl: true });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      }).addTo(leafletMap);
+
+      var homeIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:38px;height:38px;border-radius:50%;background:#1A1F3C;' +
+              'border:2.5px solid #C9A84C;' +
+              'box-shadow:0 0 0 3px rgba(201,168,76,0.35),0 3px 10px rgba(0,0,0,0.4);' +
+              'display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1">' +
+              '🏨' +
+              '</div>',
+        iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -24],
+      });
+
+      homeMarker = L.marker([35.6322, 139.7316], { icon: homeIcon, zIndexOffset: 2000 })
+        .bindPopup(function() { return getHomePopupHTML(); }, { closeButton: false })
+        .addTo(leafletMap);
+
+      window.SPOTS.forEach(function(spot) {
+        var marker = L.marker([spot.lat, spot.lng], { icon: makeIcon(spot) })
+          .bindPopup(function() { return makePopupHTML(spot); }, { closeButton: false, maxWidth: 260 })
+          .addTo(leafletMap);
+
+        marker.on('click', function() {
+          highlightCard(spot.id);
+          scrollToCard(spot.id);
+        });
+
+        markers[spot.id] = marker;
+      });
+
+      leafletMap.on('popupclose', function() {
+        document.querySelectorAll('.card.map-active').forEach(function(c) {
+          c.classList.remove('map-active');
+        });
+      });
+    }
+
+    /* ── Card ↔ Map interaction ─────────────────────────────── */
+
+    function scrollToCard(id) {
+      var card  = document.querySelector('[data-id="' + id + '"]');
+      if (!card) return;
+      var panel = document.getElementById('list-panel');
+      var isSplit = window.innerWidth >= 1024;
+      if (isSplit && panel) {
+        var panelRect = panel.getBoundingClientRect();
+        var cardRect  = card.getBoundingClientRect();
+        panel.scrollBy({ top: cardRect.top - panelRect.top - 16, behavior: 'smooth' });
+      } else {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function highlightCard(id) {
+      document.querySelectorAll('.card.map-active').forEach(function(c) { c.classList.remove('map-active'); });
+      var card = document.querySelector('[data-id="' + id + '"]');
+      if (card) card.classList.add('map-active');
+    }
+
+    function panToSpot(spot) {
+      if (!leafletMap || !markers[spot.id]) return;
+      leafletMap.panTo([spot.lat, spot.lng], { animate: !REDUCE_MOTION });
+      markers[spot.id].openPopup();
+      highlightCard(spot.id);
+    }
+
+    /* ── Filter matching ────────────────────────────────────── */
+
+    function matchesFilter(spot, filter) {
+      if (filter === 'all') return true;
+      if (filter === 'temple-shrine') return spot.category === 'temple' || spot.category === 'shrine';
+      if (filter === 'food') return spot.category === 'restaurant' || spot.category === 'bar';
+      return spot.category === filter;
+    }
+
+    /* ── Card rendering ─────────────────────────────────────── */
+
+    function renderCards(filter) {
+      currentlyOpen = null;
+      currentFilter = filter;
+      var str  = s();
+      var grid = document.getElementById('card-grid');
+      grid.innerHTML = '';
+
+      SPOTS_SORTED.forEach(function(spot) {
+        var isJa    = lang === 'ja';
+        var visible = matchesFilter(spot, filter);
+        var isFood  = spot.category === 'restaurant' || spot.category === 'bar';
+
+        var displayName    = isJa ? spot.nameJP : spot.name;
+        var displayNameSub = isJa ? spot.name   : spot.nameJP;
+        var displayDesc    = isJa ? (spot.descJP    || spot.desc)    : spot.desc;
+        var displayTip     = isJa ? (spot.tipJP     || spot.tip)     : spot.tip;
+        var displayWalk    = isJa ? (spot.walkJP    || spot.walk)    : spot.walk;
+        var displayCuisine = isJa ? (spot.cuisineJP || spot.cuisine) : spot.cuisine;
+        var shortDesc      = displayDesc.slice(0, 60) + '…';
+
+        var ownerBanner = spot.ownerPick
+          ? '<div class="owner-banner">' + str.ownerBanner + '</div>'
+          : '';
+
+        var ratingsInner = '';
+        if (spot.googleRating !== null) {
+          ratingsInner +=
+            '<div class="rating-google">★ ' + spot.googleRating +
+            ' <span class="rating-count">(' + (spot.googleReviews || 0).toLocaleString() +
+            ' ' + str.reviews + ')</span></div>';
+        }
+        if (spot.tabelog !== null) {
+          ratingsInner += '<div class="rating-tabelog">食べログ ★ ' + spot.tabelog + '</div>';
+          var tNote = isJa ? (spot.tabelogNoteJP || spot.tabelogNote) : spot.tabelogNote;
+          if (tNote) ratingsInner += '<div class="rating-note">' + esc(tNote) + '</div>';
+        }
+        var ratingsHTML = ratingsInner ? '<div class="ratings">' + ratingsInner + '</div>' : '';
+
+        var cuisineHTML = (isFood && displayCuisine) ? '<div class="card-cuisine">' + esc(displayCuisine) + '</div>' : '';
+        var budgetHTML  = (isFood && spot.budget)    ? '<div class="card-budget">'  + esc(spot.budget)    + '</div>' : '';
+        var tipHTML     = displayTip ? '<div class="card-tip">💡 ' + esc(displayTip) + '</div>' : '';
+
+        var igHTML = '';
+        if (spot.instagram) {
+          var handle = spot.instagram.replace(/.*instagram\.com\//, '').replace(/\/$/, '');
+          igHTML = '<a class="card-link" href="' + esc(spot.instagram) +
+                   '" target="_blank" rel="noopener noreferrer">📷 @' + esc(handle) + '</a>';
+        }
+
+        var card = document.createElement('article');
+        card.className = 'card' + (visible ? '' : ' hidden');
+        card.dataset.category = spot.category;
+        card.dataset.id       = spot.id;
+        card.setAttribute('role', 'listitem');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-expanded', 'false');
+
+        card.innerHTML =
+          ownerBanner +
+          '<div class="card-body">' +
+            '<h3 class="card-name">' + esc(displayName) + '</h3>' +
+            '<div class="card-namejp">' + esc(displayNameSub) + '</div>' +
+            '<div class="walk-pill">🚶 ' + esc(displayWalk) + '</div>' +
+            '<div class="card-hours" data-spot-id="' + esc(spot.id) + '">' + buildBadgeHTML(spot) + '</div>' +
+            ratingsHTML + cuisineHTML + budgetHTML +
+            '<div class="short-desc">' + esc(shortDesc) + '</div>' +
+            '<div class="card-expand">' +
+              '<div class="card-desc">' + esc(displayDesc) + '</div>' +
+              tipHTML +
+              '<div class="card-links">' +
+                '<a class="card-link" href="' + esc(spot.googleMapsUrl) +
+                '" target="_blank" rel="noopener noreferrer">' + str.mapsLink + '</a>' +
+                igHTML +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="card-footer"><button class="toggle-btn">' + str.moreBtn + '</button></div>';
+
+        card.querySelector('.toggle-btn').setAttribute('aria-label', 'Show more details for ' + spot.name);
+
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('a')) return;
+          toggleCard(card);
+          panToSpot(spot);
+        });
+
+        card.addEventListener('keydown', function(e) {
+          if (e.target.closest('a, button')) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleCard(card);
+            panToSpot(spot);
+          }
+        });
+
+        card.querySelector('.toggle-btn').addEventListener('click', function(e) {
+          e.stopPropagation();
+          toggleCard(card);
+          panToSpot(spot);
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* ── Expand / collapse ──────────────────────────────────── */
+
+    function expandCard(card) {
+      card.classList.add('expanded');
+      card.setAttribute('aria-expanded', 'true');
+      card.querySelector('.toggle-btn').textContent = s().lessBtn;
+      currentlyOpen = card;
+    }
+
+    function collapseCard(card) {
+      card.classList.remove('expanded');
+      card.setAttribute('aria-expanded', 'false');
+      card.querySelector('.toggle-btn').textContent = s().moreBtn;
+      if (currentlyOpen === card) currentlyOpen = null;
+    }
+
+    function toggleCard(card) {
+      if (card.classList.contains('expanded')) {
+        collapseCard(card);
+      } else {
+        if (currentlyOpen) collapseCard(currentlyOpen);
+        expandCard(card);
+      }
+    }
+
+    /* ── Filter ─────────────────────────────────────────────── */
+
+    function applyFilter(filter) {
+      if (currentlyOpen) collapseCard(currentlyOpen);
+      currentFilter = filter;
+
+      document.querySelectorAll('.card').forEach(function(card) {
+        var spot = window.SPOTS.find(function(s) { return s.id === card.dataset.id; });
+        var show = !!(spot && matchesFilter(spot, filter));
+
+        if (markers[card.dataset.id]) {
+          if (show) markers[card.dataset.id].addTo(leafletMap);
+          else      markers[card.dataset.id].remove();
+        }
+
+        if (REDUCE_MOTION) {
+          card.classList.toggle('hidden', !show);
+          return;
+        }
+        if (show) {
+          card.style.opacity   = '0';
+          card.style.transform = 'scale(0.96)';
+          card.classList.remove('hidden');
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              card.style.opacity   = '';
+              card.style.transform = '';
+            });
+          });
+        } else {
+          card.style.opacity   = '0';
+          card.style.transform = 'scale(0.96)';
+          setTimeout(function() {
+            card.classList.add('hidden');
+            card.style.opacity   = '';
+            card.style.transform = '';
+          }, 200);
+        }
+      });
+    }
+
+    /* ── Hours badge live refresh ───────────────────────────── */
+
+    function updateAllBadges() {
+      document.querySelectorAll('.card-hours').forEach(function(el) {
+        var spot = window.SPOTS.find(function(sp) { return sp.id === el.dataset.spotId; });
+        if (spot) el.innerHTML = buildBadgeHTML(spot);
+      });
+    }
+
+    /* ── Language toggle ────────────────────────────────────── */
+
+    function updateStaticText() {
+      var str = s();
+      document.getElementById('nav-logo').textContent    = str.navTitle;
+      document.getElementById('lang-btn').textContent    = str.langBtn;
+      document.getElementById('list-title').textContent  = str.listTitle;
+      document.getElementById('list-sub').textContent    = str.listSub;
+      document.getElementById('list-intro').textContent  = str.listIntro;
+      document.getElementById('footer-l1').textContent   = str.footerL1;
+      document.getElementById('footer-l2').textContent   = str.footerL2;
+      var btns = document.querySelectorAll('.filter-btn');
+      btns[0].textContent = str.filterAll;
+      btns[1].textContent = str.filterTemple;
+      btns[2].textContent = str.filterLand;
+      btns[3].textContent = str.filterFood;
+      document.documentElement.lang = lang;
+    }
+
+    function setLang(newLang) {
+      lang = newLang;
+      updateStaticText();
+      renderCards(currentFilter);
+      updateNavHeight();
+    }
+
+    document.getElementById('lang-btn').addEventListener('click', function() {
+      setLang(lang === 'en' ? 'ja' : 'en');
+    });
+
+    /* ── Nav height CSS variable ────────────────────────────── */
+
+    function updateNavHeight() {
+      var nav = document.querySelector('.nav');
+      if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+    }
+
+    /* ── Filter buttons ─────────────────────────────────────── */
+
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        applyFilter(btn.dataset.filter);
+      });
+    });
+
+    /* ── Init ───────────────────────────────────────────────── */
+
+    updateNavHeight();
+    window.addEventListener('resize', function() {
+      updateNavHeight();
+      if (leafletMap) leafletMap.invalidateSize();
+    });
+
+    initMap();
+    renderCards('all');
+    updateAllBadges();
+    setInterval(updateAllBadges, 60000);
+  </script>
+
+</body>
+</html>
