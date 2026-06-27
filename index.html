@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,12 +59,6 @@
       padding: 0.75rem 1.25rem;
     }
 
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
     .nav-logo {
       font-family: 'Noto Serif JP', serif;
       font-weight: 600;
@@ -73,21 +67,13 @@
       white-space: nowrap;
     }
 
-    .lang-btn {
-      background: none;
-      border: 1px solid #D1CBC0;
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: 'Noto Serif JP', serif;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--color-muted);
-      padding: 0.22rem 0.6rem;
-      transition: color 150ms ease, border-color 150ms ease;
-      white-space: nowrap;
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
-    .lang-btn:hover { color: var(--color-ink); border-color: var(--color-ink); }
-    .lang-btn:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
 
     .nav-filters {
       display: flex;
@@ -112,11 +98,71 @@
     .filter-btn.active { color: var(--color-ink); border-bottom-color: var(--color-gold); }
     .filter-btn:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
 
-    /* ── SPLIT LAYOUT ─────────────────────────────────────── */
-    .layout {
+    /* ── LANG DROPDOWN ────────────────────────────────────── */
+    .lang-dropdown { position: relative; }
+
+    .lang-trigger {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--color-surface);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--color-ink);
+      padding: 6px 12px;
+      white-space: nowrap;
+      transition: border-color 150ms ease;
     }
+    .lang-trigger:hover { border-color: var(--color-ink); }
+    .lang-trigger:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+
+    .lang-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      background: var(--color-surface);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      list-style: none;
+      min-width: 160px;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .lang-menu.open { display: block; }
+    .lang-menu li {
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 100ms;
+    }
+    .lang-menu li:hover { background: var(--color-bg); }
+    .lang-menu li.active { border-left-color: var(--color-gold); }
+
+    @media (max-width: 400px) { .lang-label { display: none; } }
+
+    /* ── CJK FONT OVERRIDES ───────────────────────────────── */
+    body[data-lang="zh"] .card-name,
+    body[data-lang="zh"] .card-namejp,
+    body[data-lang="zh"] .card-desc,
+    body[data-lang="zh"] .card-tip,
+    body[data-lang="zh"] .short-desc,
+    body[data-lang="zh"] .tenant-desc { font-family: 'Noto Sans SC', 'Inter', sans-serif; }
+
+    body[data-lang="ko"] .card-name,
+    body[data-lang="ko"] .card-namejp,
+    body[data-lang="ko"] .card-desc,
+    body[data-lang="ko"] .card-tip,
+    body[data-lang="ko"] .short-desc,
+    body[data-lang="ko"] .tenant-desc { font-family: 'Noto Sans KR', 'Inter', sans-serif; }
+
+    /* ── SPLIT LAYOUT ─────────────────────────────────────── */
+    .layout { display: flex; flex-direction: column; }
 
     @media (min-width: 1024px) {
       .layout {
@@ -127,33 +173,19 @@
     }
 
     /* ── MAP PANEL ────────────────────────────────────────── */
-    .map-panel {
-      width: 100%;
-      height: 380px;
-      flex-shrink: 0;
-      position: relative;
-    }
+    .map-panel { width: 100%; height: 380px; flex-shrink: 0; position: relative; }
 
     @media (min-width: 1024px) {
-      .map-panel {
-        flex: 0 0 60%;
-        height: 100%;
-      }
+      .map-panel { flex: 0 0 60%; height: 100%; }
     }
 
     #map { width: 100%; height: 100%; }
 
     /* ── LIST PANEL ───────────────────────────────────────── */
-    .list-panel {
-      flex: 1;
-      background: var(--color-bg);
-    }
+    .list-panel { flex: 1; background: var(--color-bg); }
 
     @media (min-width: 1024px) {
-      .list-panel {
-        overflow-y: auto;
-        height: 100%;
-      }
+      .list-panel { overflow-y: auto; height: 100%; }
     }
 
     /* ── LIST INTRO ───────────────────────────────────────── */
@@ -161,7 +193,6 @@
       padding: 1.4rem 1.25rem 0.9rem;
       border-bottom: 1px solid #e5e0d8;
     }
-
     .list-intro h1 {
       font-family: 'Noto Serif JP', serif;
       font-weight: 600;
@@ -169,18 +200,8 @@
       color: var(--color-ink);
       margin-bottom: 0.2rem;
     }
-
-    .list-intro .sub {
-      font-size: 0.8rem;
-      color: var(--color-muted);
-      margin-bottom: 0.55rem;
-    }
-
-    .list-intro .intro {
-      font-size: 0.86rem;
-      color: var(--color-ink);
-      line-height: 1.65;
-    }
+    .list-intro .sub  { font-size: 0.8rem; color: var(--color-muted); margin-bottom: 0.55rem; }
+    .list-intro .intro { font-size: 0.86rem; color: var(--color-ink); line-height: 1.65; }
 
     /* ── CARD GRID ────────────────────────────────────────── */
     .card-grid {
@@ -203,25 +224,14 @@
       transition: transform 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
       scroll-margin-top: 16px;
     }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.10);
-    }
-
-    .card:focus-visible {
-      outline: 2px solid var(--color-gold);
-      outline-offset: 2px;
-    }
-
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+    .card:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
     .card[data-category="temple"]     { border-left-color: var(--color-temple); }
     .card[data-category="shrine"]     { border-left-color: var(--color-shrine); }
     .card[data-category="landmark"]   { border-left-color: var(--color-landmark); }
     .card[data-category="restaurant"] { border-left-color: var(--color-restaurant); }
     .card[data-category="bar"]        { border-left-color: var(--color-bar); }
-
     .card.hidden { display: none; }
-
     .card.map-active {
       box-shadow: 0 0 0 2px var(--color-gold), 0 6px 20px rgba(0,0,0,0.12);
       transform: translateY(-1px);
@@ -237,12 +247,27 @@
       letter-spacing: 0.04em;
     }
 
-    /* ── CARD BODY ────────────────────────────────────────── */
-    .card-body {
-      padding: 0.9rem 1rem 0.7rem;
-      flex: 1;
+    /* ── CARD TOP ─────────────────────────────────────────── */
+    .card-top {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.9rem 1rem 0.7rem;
+    }
+    .card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .card-photo { flex-shrink: 0; width: 110px; }
+    .card-photo img { width: 110px; height: 82px; object-fit: cover; border-radius: 7px; display: block; }
+    .photo-placeholder {
+      width: 110px; height: 82px; border-radius: 7px;
+      background: #EDE8E2; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .card-top { flex-direction: column; padding: 0; gap: 0; }
+      .card-info { padding: 0.75rem 1rem 0.5rem; }
+      .card-photo { width: 100%; order: -1; }
+      .card-photo img { width: 100%; height: 160px; border-radius: 0; }
+      .photo-placeholder { width: 100%; height: 160px; border-radius: 0; }
     }
 
     .card-name {
@@ -253,12 +278,7 @@
       line-height: 1.4;
       margin-bottom: 0.15rem;
     }
-
-    .card-namejp {
-      font-size: 0.75rem;
-      color: var(--color-muted);
-      margin-bottom: 0.55rem;
-    }
+    .card-namejp { font-size: 0.75rem; color: var(--color-muted); margin-bottom: 0.55rem; }
 
     .walk-pill {
       display: inline-block;
@@ -285,27 +305,11 @@
     }
     .hours-pill.open   { background: #DCFCE7; color: var(--color-open); }
     .hours-pill.closed { background: #FFE4E6; color: var(--color-closed); }
-
-    .hours-today {
-      font-size: 0.72rem;
-      color: var(--color-muted);
-      margin-bottom: 0.1rem;
-    }
-
-    .hours-note {
-      font-size: 0.69rem;
-      color: var(--color-muted);
-      font-style: italic;
-    }
+    .hours-today { font-size: 0.72rem; color: var(--color-muted); margin-bottom: 0.1rem; }
+    .hours-note  { font-size: 0.69rem; color: var(--color-muted); font-style: italic; }
 
     /* ── RATINGS ──────────────────────────────────────────── */
-    .ratings {
-      display: flex;
-      flex-direction: column;
-      gap: 0.12rem;
-      margin-bottom: 0.4rem;
-      font-size: 0.77rem;
-    }
+    .ratings { display: flex; flex-direction: column; gap: 0.12rem; margin-bottom: 0.4rem; font-size: 0.77rem; }
     .rating-google  { color: var(--color-ink); }
     .rating-tabelog { color: var(--color-ink); }
     .rating-count { color: var(--color-muted); font-size: 0.71rem; }
@@ -327,42 +331,72 @@
     .card.expanded .short-desc { display: none; }
 
     /* ── EXPANDABLE SECTION ───────────────────────────────── */
-    .card-expand {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 300ms ease;
-    }
-    .card.expanded .card-expand { max-height: 900px; }
+    .card-expand { max-height: 0; overflow: hidden; transition: max-height 300ms ease; }
+    .card.expanded .card-expand { max-height: 1100px; }
 
-    .card-desc {
-      font-size: 0.82rem;
-      color: var(--color-ink);
-      line-height: 1.7;
-      margin-bottom: 0.6rem;
-      padding-top: 0.4rem;
-    }
-    .card-tip {
-      font-size: 0.79rem;
-      color: var(--color-muted);
-      font-style: italic;
-      margin-bottom: 0.65rem;
-    }
+    .card-desc { font-size: 0.82rem; color: var(--color-ink); line-height: 1.7; margin-bottom: 0.6rem; padding-top: 0.4rem; }
+    .card-tip  { font-size: 0.79rem; color: var(--color-muted); font-style: italic; margin-bottom: 0.65rem; }
     .card-links { display: flex; flex-direction: column; gap: 0.35rem; padding-bottom: 0.2rem; }
 
-    .card-link {
-      font-size: 0.79rem;
-      color: var(--color-gold);
-      text-decoration: none;
-      font-weight: 500;
-    }
+    .card-link { font-size: 0.79rem; color: var(--color-gold); text-decoration: none; font-weight: 500; }
     .card-link:hover { text-decoration: underline; }
     .card-link:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; border-radius: 2px; }
 
-    /* ── CARD FOOTER ──────────────────────────────────────── */
-    .card-footer {
-      border-top: 1px solid #f0ede8;
-      padding: 0.45rem 1rem 0.5rem;
+    /* ── TENANT (sub-spot) ────────────────────────────────── */
+    .tenant-pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #7B3FA0;
+      background: #EDE0FA;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      margin-bottom: 0.45rem;
+      width: fit-content;
     }
+    .tenant-block {
+      margin: 0.5rem 0 0.55rem;
+      padding: 0.65rem 0.8rem;
+      background: #F7F3EC;
+      border-radius: 8px;
+      border-left: 3px solid #7B3FA0;
+    }
+    .tenant-header {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .tenant-days {
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: #DFC8F8;
+      color: #5C2D8A;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+    }
+    .tenant-inner { display: flex; flex-direction: row; gap: 0.6rem; align-items: flex-start; }
+    .tenant-info  { flex: 1; min-width: 0; }
+    .tenant-photo { flex-shrink: 0; }
+    .tenant-photo img {
+      width: 110px; height: 82px;
+      object-fit: cover; border-radius: 7px; display: block;
+    }
+    @media (max-width: 640px) {
+      .tenant-inner { flex-direction: column-reverse; }
+      .tenant-photo { width: 100%; }
+      .tenant-photo img { width: 100%; height: 160px; border-radius: 6px; }
+    }
+    .tenant-hours { margin: 0.3rem 0 0.4rem; }
+    .tenant-desc  { font-size: 0.77rem; color: var(--color-muted); line-height: 1.55; margin-bottom: 0.4rem; }
+    .tenant-links { display: flex; flex-direction: column; gap: 0.2rem; }
+
+    /* ── CARD FOOTER ──────────────────────────────────────── */
+    .card-footer { border-top: 1px solid #f0ede8; padding: 0.45rem 1rem 0.5rem; }
 
     .toggle-btn {
       background: none;
@@ -405,39 +439,46 @@
   <!-- ── NAV ─────────────────────────────────────────────── -->
   <nav class="nav" aria-label="Main navigation">
     <div class="nav-inner">
-      <div class="nav-left">
-        <span class="nav-logo" id="nav-logo">Takanawa Guest Guide</span>
-        <button class="lang-btn" id="lang-btn" aria-label="Switch language">日本語</button>
-      </div>
-      <div class="nav-filters" role="group" aria-label="Filter spots by category">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="temple-shrine">Temples &amp; Shrines</button>
-        <button class="filter-btn" data-filter="landmark">Landmarks</button>
-        <button class="filter-btn" data-filter="food">Restaurants &amp; Bars</button>
+      <span class="nav-logo" id="nav-logo" data-i18n="navTitle">高輪ゲストガイド</span>
+      <div class="nav-right">
+        <div class="nav-filters" role="group" aria-label="Filter spots by category">
+          <button class="filter-btn active" data-filter="all"          data-i18n="filterAll">すべて</button>
+          <button class="filter-btn"        data-filter="temple-shrine" data-i18n="filterTemple">寺院・神社</button>
+          <button class="filter-btn"        data-filter="landmark"      data-i18n="filterLand">観光スポット</button>
+          <button class="filter-btn"        data-filter="restaurant"    data-i18n="filterRest">レストラン</button>
+          <button class="filter-btn"        data-filter="bar"           data-i18n="filterBar">バー</button>
+        </div>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <button class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
+            🌐 <span class="lang-label">Language</span> ▾
+          </button>
+          <ul class="lang-menu" id="lang-menu" role="listbox">
+            <li role="option" data-lang="ja">日本語</li>
+            <li role="option" data-lang="en">English</li>
+            <li role="option" data-lang="zh">中文（简体）</li>
+            <li role="option" data-lang="ko">한국어</li>
+          </ul>
+        </div>
       </div>
     </div>
   </nav>
 
   <!-- ── SPLIT LAYOUT ─────────────────────────────────────── -->
   <div class="layout">
-
-    <div class="map-panel">
-      <div id="map"></div>
-    </div>
+    <div class="map-panel"><div id="map"></div></div>
 
     <div class="list-panel" id="list-panel">
       <div class="list-intro">
-        <h1 id="list-title">Your Neighbourhood</h1>
-        <p class="sub" id="list-sub">港区高輪3-10-38 · Takanawadai Station</p>
-        <p class="intro" id="list-intro">Everything worth knowing within walking distance — hidden temples, neighbourhood restaurants, and one bar your host happens to own.</p>
+        <h1 id="list-title" data-i18n="heroHeadline">あなたの街</h1>
+        <p class="sub">港区高輪3-10-38 · 高輪台駅</p>
+        <p class="intro" id="list-intro" data-i18n="heroSub">徒歩圏内の寺院・飲食店・穴場スポット</p>
       </div>
       <div class="card-grid" id="card-grid" role="list"></div>
       <footer class="site-footer">
-        <p id="footer-l1">Made with ❤️ for our guests · 港区高輪3-10-38</p>
-        <p id="footer-l2">Hours are shown in Japan Standard Time (JST)</p>
+        <p id="footer-l1" data-i18n="footerL1">ゲストの皆様へ ❤️</p>
+        <p id="footer-l2" data-i18n="footerL2">営業時間は日本標準時（JST）で表示</p>
       </footer>
     </div>
-
   </div>
 
   <script src="spots.js"></script>
@@ -448,51 +489,101 @@
     /* ── Language strings ───────────────────────────────────── */
 
     var STRINGS = {
+      ja: {
+        navTitle:     '高輪ゲストガイド',
+        heroHeadline: 'あなたの街',
+        heroSub:      '徒歩圏内の寺院・飲食店・穴場スポット',
+        filterAll:    'すべて',
+        filterTemple: '寺院・神社',
+        filterLand:   '観光スポット',
+        filterRest:   'レストラン',
+        filterBar:    'バー',
+        openNow:      '● 営業中',
+        closedNow:    '● 営業時間外',
+        todayPfx:     '本日：',
+        todayClosed:  '本日：定休日',
+        mapsLink:     'Google マップで開く ↗',
+        websiteLabel: '公式サイト ↗',
+        igLabel:      'Instagram ↗',
+        moreBtn:      '▼ 詳しく',
+        lessBtn:      '▲ 閉じる',
+        ownerBanner:  '⭐ オーナーおすすめ！',
+        homeLabel:    'お宿',
+        footerL1:     'ゲストの皆様へ ❤️',
+        footerL2:     '営業時間は日本標準時（JST）で表示',
+        reviews:      '件',
+      },
       en: {
         navTitle:     'Takanawa Guest Guide',
+        heroHeadline: 'Your Neighbourhood',
+        heroSub:      'Hidden temples, restaurants, and local bars within walking distance',
         filterAll:    'All',
         filterTemple: 'Temples & Shrines',
         filterLand:   'Landmarks',
-        filterFood:   'Restaurants & Bars',
-        listTitle:    'Your Neighbourhood',
-        listSub:      '港区高輪3-10-38 · Takanawadai Station',
-        listIntro:    'Everything worth knowing within walking distance — hidden temples, neighbourhood restaurants, and one bar your host happens to own.',
-        openNow:      'Open now',
-        closedNow:    'Closed now',
+        filterRest:   'Restaurants',
+        filterBar:    'Bars',
+        openNow:      '● Open now',
+        closedNow:    '● Closed now',
         todayPfx:     'Today: ',
         todayClosed:  'Today: Closed',
+        mapsLink:     'Open in Google Maps ↗',
+        websiteLabel: 'Official Website ↗',
+        igLabel:      'Instagram ↗',
         moreBtn:      '▼ More',
         lessBtn:      '▲ Less',
-        ownerBanner:  "⭐ Owner's Pick — Your host's bar!",
-        mapsLink:     'Open in Google Maps ↗',
-        reviews:      'reviews',
+        ownerBanner:  "⭐ Owner's Pick!",
         homeLabel:    'Your Accommodation',
-        footerL1:     'Made with ❤️ for our guests · 港区高輪3-10-38',
-        footerL2:     'Hours are shown in Japan Standard Time (JST)',
-        langBtn:      '日本語',
+        footerL1:     'Made with ❤️ for our guests',
+        footerL2:     'Hours shown in Japan Standard Time (JST)',
+        reviews:      'reviews',
       },
-      ja: {
-        navTitle:     '高輪ゲストガイド',
-        filterAll:    'すべて',
-        filterTemple: '寺社',
-        filterLand:   '観光スポット',
-        filterFood:   '飲食店・バー',
-        listTitle:    'ご近所マップ',
-        listSub:      '港区高輪3-10-38 · 高輪台駅',
-        listIntro:    '徒歩圏内の名所をご紹介します。隠れた寺社、ご近所のレストラン、そして宿のオーナーが営むバー。',
-        openNow:      '営業中',
-        closedNow:    '営業時間外',
-        todayPfx:     '本日: ',
-        todayClosed:  '本日: 定休日',
-        moreBtn:      '▼ 詳細',
-        lessBtn:      '▲ 閉じる',
-        ownerBanner:  '⭐ オーナーのおすすめ — 宿のご主人のバーです！',
-        mapsLink:     'Google マップで開く ↗',
-        reviews:      '件',
-        homeLabel:    'お宿',
-        footerL1:     'ゲストの皆様へ愛を込めて · 港区高輪3-10-38',
-        footerL2:     '営業時間は日本標準時（JST）で表示しています',
-        langBtn:      'English',
+      zh: {
+        navTitle:     '高轮观光指南',
+        heroHeadline: '您的街区',
+        heroSub:      '步行可达的寺院、餐厅和隐秘景点',
+        filterAll:    '全部',
+        filterTemple: '寺庙・神社',
+        filterLand:   '景点',
+        filterRest:   '餐厅',
+        filterBar:    '酒吧',
+        openNow:      '● 营业中',
+        closedNow:    '● 已打烊',
+        todayPfx:     '今日：',
+        todayClosed:  '今日：休息',
+        mapsLink:     '在 Google 地图中打开 ↗',
+        websiteLabel: '官方网站 ↗',
+        igLabel:      'Instagram ↗',
+        moreBtn:      '▼ 展开',
+        lessBtn:      '▲ 收起',
+        ownerBanner:  '⭐ 店主推荐！',
+        homeLabel:    '您的住所',
+        footerL1:     '献给我们的宾客 ❤️',
+        footerL2:     '营业时间以日本标准时间（JST）显示',
+        reviews:      '条评价',
+      },
+      ko: {
+        navTitle:     '다카나와 게스트 가이드',
+        heroHeadline: '우리 동네',
+        heroSub:      '도보권 내 사원·식당·숨은 명소',
+        filterAll:    '전체',
+        filterTemple: '사원 & 신사',
+        filterLand:   '랜드마크',
+        filterRest:   '레스토랑',
+        filterBar:    '바',
+        openNow:      '● 영업 중',
+        closedNow:    '● 영업 종료',
+        todayPfx:     '오늘: ',
+        todayClosed:  '오늘: 휴무',
+        mapsLink:     'Google 지도 열기 ↗',
+        websiteLabel: '공식 웹사이트 ↗',
+        igLabel:      '인스타그램 ↗',
+        moreBtn:      '▼ 더보기',
+        lessBtn:      '▲ 접기',
+        ownerBanner:  '⭐ 오너 추천!',
+        homeLabel:    '숙소',
+        footerL1:     '우리의 게스트를 위해 ❤️',
+        footerL2:     '영업시간은 일본 표준시(JST) 기준',
+        reviews:      '개',
       },
     };
 
@@ -514,12 +605,13 @@
 
     /* ── State ──────────────────────────────────────────────── */
 
-    var lang          = 'en';
+    var lang          = sessionStorage.getItem('guestmap_lang') || 'ja';
     var currentFilter = 'all';
     var currentlyOpen = null;
     var leafletMap    = null;
     var homeMarker    = null;
     var markers       = {};
+    var loadedFonts   = {};
 
     /* ── Utilities ──────────────────────────────────────────── */
 
@@ -533,15 +625,59 @@
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function s() { return STRINGS[lang]; }
+    function s() { return STRINGS[lang] || STRINGS.ja; }
+
+    /* ── CJK font loader ────────────────────────────────────── */
+
+    function loadCJKFont(l) {
+      if (l === 'zh' && !loadedFonts.zh) {
+        var lk = document.createElement('link');
+        lk.rel = 'stylesheet';
+        lk.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400&display=swap';
+        document.head.appendChild(lk);
+        loadedFonts.zh = true;
+      }
+      if (l === 'ko' && !loadedFonts.ko) {
+        var lk2 = document.createElement('link');
+        lk2.rel = 'stylesheet';
+        lk2.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400&display=swap';
+        document.head.appendChild(lk2);
+        loadedFonts.ko = true;
+      }
+    }
+
+    /* ── Apply language ─────────────────────────────────────── */
+
+    function applyLanguage(newLang) {
+      lang = newLang;
+      sessionStorage.setItem('guestmap_lang', lang);
+
+      document.documentElement.lang = lang;
+      document.body.dataset.lang    = lang;
+      loadCJKFont(lang);
+
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.dataset.i18n;
+        var str = STRINGS[lang];
+        if (str && str[key] !== undefined) el.textContent = str[key];
+      });
+
+      document.querySelectorAll('#lang-menu li').forEach(function(li) {
+        li.classList.toggle('active', li.dataset.lang === lang);
+      });
+
+      renderCards(currentFilter);
+      updateNavHeight();
+      if (homeMarker) homeMarker.setPopupContent(getHomePopupHTML());
+    }
 
     /* ── Hours logic ────────────────────────────────────────── */
 
     function isOpenNow(spot) {
-      var now  = new Date();
-      var jst  = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-      var day  = jst.getUTCDay();
-      var hhmm = jst.getUTCHours() * 100 + jst.getUTCMinutes();
+      var now   = new Date();
+      var jst   = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      var day   = jst.getUTCDay();
+      var hhmm  = jst.getUTCHours() * 100 + jst.getUTCMinutes();
       var slots = spot.hours[day];
       if (!slots) return { open: false, slots: null };
       var open = false;
@@ -555,14 +691,14 @@
     }
 
     function buildBadgeHTML(spot) {
-      var r = isOpenNow(spot);
+      var r   = isOpenNow(spot);
       var str = s();
       var todayStr = r.slots
         ? str.todayPfx + r.slots.map(function(p) { return fmtHHMM(p[0]) + '–' + fmtHHMM(p[1]); }).join(', ')
         : str.todayClosed;
-      var note = lang === 'ja' ? (spot.hoursNoteJP || spot.hoursNote) : spot.hoursNote;
+      var note = lang === 'en' ? spot.hoursNote : (spot.hoursNoteJP || spot.hoursNote);
       return (
-        '<span class="hours-pill ' + (r.open ? 'open' : 'closed') + '">● ' +
+        '<span class="hours-pill ' + (r.open ? 'open' : 'closed') + '">' +
         (r.open ? str.openNow : str.closedNow) + '</span>' +
         '<div class="hours-today">' + esc(todayStr) + '</div>' +
         (note ? '<div class="hours-note">' + esc(note) + '</div>' : '')
@@ -584,8 +720,7 @@
               'background:rgba(255,255,255,0.96);' + border + ';' +
               'display:flex;align-items:center;justify-content:center;' +
               'font-size:' + fontSize + ';line-height:1">' +
-              (spot.emoji || '📍') +
-              '</div>',
+              (spot.emoji || '📍') + '</div>',
         iconSize:    [size, size],
         iconAnchor:  [half, half],
         popupAnchor: [0, -half - 6],
@@ -597,44 +732,36 @@
       var str   = s();
       var color = CAT_COLORS[spot.category] || '#6B7280';
       var emoji = spot.emoji || '📍';
-      var displayName = lang === 'ja' ? spot.nameJP : spot.name;
-      var displaySub  = lang === 'ja' ? spot.name   : spot.nameJP;
-      var displayWalk = lang === 'ja' ? (spot.walkJP || spot.walk) : spot.walk;
+      var useJP = lang === 'ja';
+      var displayName = useJP ? spot.nameJP : spot.name;
+      var displaySub  = useJP ? spot.name   : spot.nameJP;
+      var displayWalk = useJP ? (spot.walkJP || spot.walk) : spot.walk;
 
-      var media;
-      if (spot.photo) {
-        media =
-          '<img src="' + esc(spot.photo) + '" alt="' + esc(spot.name) + '" ' +
+      var media = spot.photo
+        ? '<img src="' + esc(spot.photo) + '" alt="' + esc(spot.name) + '" ' +
           'style="width:100%;height:130px;object-fit:cover;display:block" ' +
-          'onerror="this.style.display=\'none\'">';
-      } else {
-        media =
-          '<div style="height:100px;display:flex;align-items:center;justify-content:center;' +
+          'onerror="this.style.display=\'none\'">'
+        : '<div style="height:100px;display:flex;align-items:center;justify-content:center;' +
           'background:linear-gradient(135deg,' + color + '20 0%,' + color + '42 100%)">' +
-          '<span style="font-size:2.4rem;opacity:0.75">' + emoji + '</span>' +
-          '</div>';
-      }
+          '<span style="font-size:2.4rem;opacity:0.75">' + emoji + '</span></div>';
 
       return (
         '<div style="font-family:Inter,sans-serif;width:236px">' +
           media +
           '<div style="padding:10px 13px 13px">' +
             '<div style="font-weight:600;font-size:0.88rem;color:#1A1F3C;line-height:1.35;margin-bottom:2px">' +
-              esc(displayName) +
-            '</div>' +
+              esc(displayName) + '</div>' +
             '<div style="font-size:0.71rem;color:#6B7280;margin-bottom:9px">' + esc(displaySub) + '</div>' +
             '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px">' +
               '<span style="font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;' +
                 'background:' + (r.open ? '#DCFCE7' : '#FFE4E6') + ';' +
                 'color:'      + (r.open ? '#22863A' : '#D73A49') + '">' +
-                '● ' + (r.open ? str.openNow : str.closedNow) +
-              '</span>' +
+                (r.open ? str.openNow : str.closedNow) + '</span>' +
               '<span style="font-size:0.71rem;color:#6B7280;white-space:nowrap">🚶 ' + esc(displayWalk) + '</span>' +
             '</div>' +
             '<a href="' + esc(spot.googleMapsUrl) + '" target="_blank" rel="noopener noreferrer" ' +
               'style="font-size:0.75rem;color:#C9A84C;font-weight:500;text-decoration:none">' +
-              str.mapsLink +
-            '</a>' +
+              str.mapsLink + '</a>' +
           '</div>' +
         '</div>'
       );
@@ -642,7 +769,7 @@
 
     function getHomePopupHTML() {
       return (
-        '<div style="font-family:Inter,sans-serif">' +
+        '<div style="font-family:Inter,sans-serif;padding:10px 13px 12px">' +
           '<div style="font-weight:600;font-size:0.82rem;color:#1A1F3C">' + s().homeLabel + '</div>' +
           '<div style="font-size:0.7rem;color:#6B7280">港区高輪3-10-38</div>' +
         '</div>'
@@ -650,10 +777,11 @@
     }
 
     function initMap() {
-      leafletMap = L.map('map', { center: [35.6322, 139.7316], zoom: 15, zoomControl: true });
+      leafletMap = L.map('map', { center: [35.6319, 139.7311], zoom: 15, zoomControl: true });
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> ' +
+                     'contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 20,
       }).addTo(leafletMap);
@@ -663,13 +791,11 @@
         html: '<div style="width:38px;height:38px;border-radius:50%;background:#1A1F3C;' +
               'border:2.5px solid #C9A84C;' +
               'box-shadow:0 0 0 3px rgba(201,168,76,0.35),0 3px 10px rgba(0,0,0,0.4);' +
-              'display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1">' +
-              '🏨' +
-              '</div>',
+              'display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1">🏨</div>',
         iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -24],
       });
 
-      homeMarker = L.marker([35.6322, 139.7316], { icon: homeIcon, zIndexOffset: 2000 })
+      homeMarker = L.marker([35.6319192, 139.7310899], { icon: homeIcon, zIndexOffset: 2000 })
         .bindPopup(function() { return getHomePopupHTML(); }, { closeButton: false })
         .addTo(leafletMap);
 
@@ -727,7 +853,8 @@
     function matchesFilter(spot, filter) {
       if (filter === 'all') return true;
       if (filter === 'temple-shrine') return spot.category === 'temple' || spot.category === 'shrine';
-      if (filter === 'food') return spot.category === 'restaurant' || spot.category === 'bar';
+      if (filter === 'restaurant') return spot.category === 'restaurant';
+      if (filter === 'bar') return spot.category === 'bar';
       return spot.category === filter;
     }
 
@@ -741,16 +868,16 @@
       grid.innerHTML = '';
 
       SPOTS_SORTED.forEach(function(spot) {
-        var isJa    = lang === 'ja';
+        var useJP   = lang === 'ja';
         var visible = matchesFilter(spot, filter);
         var isFood  = spot.category === 'restaurant' || spot.category === 'bar';
 
-        var displayName    = isJa ? spot.nameJP : spot.name;
-        var displayNameSub = isJa ? spot.name   : spot.nameJP;
-        var displayDesc    = isJa ? (spot.descJP    || spot.desc)    : spot.desc;
-        var displayTip     = isJa ? (spot.tipJP     || spot.tip)     : spot.tip;
-        var displayWalk    = isJa ? (spot.walkJP    || spot.walk)    : spot.walk;
-        var displayCuisine = isJa ? (spot.cuisineJP || spot.cuisine) : spot.cuisine;
+        var displayName    = useJP ? spot.nameJP : spot.name;
+        var displayNameSub = useJP ? spot.name   : spot.nameJP;
+        var displayDesc    = useJP ? (spot.descJP    || spot.desc)    : spot.desc;
+        var displayTip     = useJP ? (spot.tipJP     || spot.tip)     : spot.tip;
+        var displayWalk    = useJP ? (spot.walkJP    || spot.walk)    : spot.walk;
+        var displayCuisine = useJP ? (spot.cuisineJP || spot.cuisine) : spot.cuisine;
         var shortDesc      = displayDesc.slice(0, 60) + '…';
 
         var ownerBanner = spot.ownerPick
@@ -766,7 +893,7 @@
         }
         if (spot.tabelog !== null) {
           ratingsInner += '<div class="rating-tabelog">食べログ ★ ' + spot.tabelog + '</div>';
-          var tNote = isJa ? (spot.tabelogNoteJP || spot.tabelogNote) : spot.tabelogNote;
+          var tNote = useJP ? (spot.tabelogNoteJP || spot.tabelogNote) : spot.tabelogNote;
           if (tNote) ratingsInner += '<div class="rating-note">' + esc(tNote) + '</div>';
         }
         var ratingsHTML = ratingsInner ? '<div class="ratings">' + ratingsInner + '</div>' : '';
@@ -775,15 +902,73 @@
         var budgetHTML  = (isFood && spot.budget)    ? '<div class="card-budget">'  + esc(spot.budget)    + '</div>' : '';
         var tipHTML     = displayTip ? '<div class="card-tip">💡 ' + esc(displayTip) + '</div>' : '';
 
+        /* ── tenant sub-spot ── */
+        var tenantPillHTML = '';
+        var tenantFullHTML = '';
+        if (spot.tenant) {
+          var t     = spot.tenant;
+          var tDays = useJP ? t.daysJP : t.days;
+          var tDesc = useJP ? (t.descJP || t.desc) : t.desc;
+          var tIgHandle = t.instagram.split('instagram.com/')[1].split('/')[0].split('?')[0];
+
+          tenantPillHTML =
+            '<div class="tenant-pill">' +
+              esc(t.emoji) + ' ' + esc(t.name) + ' · ' + esc(tDays) +
+            '</div>';
+
+          tenantFullHTML =
+            '<div class="tenant-block">' +
+              '<div class="tenant-inner">' +
+                '<div class="tenant-info">' +
+                  '<div class="tenant-header">' +
+                    esc(t.emoji) + ' ' + esc(t.name) +
+                    ' <span class="tenant-days">' + esc(tDays) + '</span>' +
+                  '</div>' +
+                  (t.hours
+                    ? '<div class="tenant-hours" data-tenant-spot-id="' + esc(spot.id) + '">' +
+                        buildBadgeHTML(t) +
+                      '</div>'
+                    : '') +
+                  '<div class="tenant-desc">' + esc(tDesc) + '</div>' +
+                  '<div class="tenant-links">' +
+                    '<a class="card-link" href="' + esc(t.googleMapsUrl) +
+                      '" target="_blank" rel="noopener noreferrer">' + str.mapsLink + '</a>' +
+                    '<a class="card-link" href="' + esc(t.instagram) +
+                      '" target="_blank" rel="noopener noreferrer">📷 @' + esc(tIgHandle) + '</a>' +
+                  '</div>' +
+                '</div>' +
+                (t.photo
+                  ? '<div class="tenant-photo">' +
+                      '<img src="' + esc(t.photo) + '" alt="' + esc(t.name) + '" ' +
+                      'onerror="this.style.display=\'none\'">' +
+                    '</div>'
+                  : '') +
+              '</div>' +
+            '</div>';
+        }
+
         var igHTML = '';
-        if (spot.instagram) {
-          var handle = spot.instagram.replace(/.*instagram\.com\//, '').replace(/\/$/, '');
+        if (spot.instagram && spot.instagram !== spot.website) {
+          var handle = spot.instagram.replace(/.*instagram\.com\//, '').replace(/\/$/, '').split('?')[0];
           igHTML = '<a class="card-link" href="' + esc(spot.instagram) +
                    '" target="_blank" rel="noopener noreferrer">📷 @' + esc(handle) + '</a>';
         }
 
+        var websiteHTML = '';
+        if (spot.website) {
+          var wsIsIg  = spot.website.includes('instagram.com');
+          var wsLabel = wsIsIg ? ('📷 ' + str.igLabel) : ('🌐 ' + str.websiteLabel);
+          websiteHTML = '<a class="card-link" href="' + esc(spot.website) +
+            '" target="_blank" rel="noopener noreferrer">' + wsLabel + '</a>';
+        }
+
+        var photoHTML = spot.photo
+          ? '<img src="' + esc(spot.photo) + '" alt="' + esc(spot.name) + '" loading="lazy" ' +
+            'onerror="this.outerHTML=\'<div class=&quot;photo-placeholder&quot;>📷</div>\'">'
+          : '<div class="photo-placeholder">📷</div>';
+
         var card = document.createElement('article');
-        card.className = 'card' + (visible ? '' : ' hidden');
+        card.className        = 'card' + (visible ? '' : ' hidden');
         card.dataset.category = spot.category;
         card.dataset.id       = spot.id;
         card.setAttribute('role', 'listitem');
@@ -792,21 +977,28 @@
 
         card.innerHTML =
           ownerBanner +
-          '<div class="card-body">' +
-            '<h3 class="card-name">' + esc(displayName) + '</h3>' +
-            '<div class="card-namejp">' + esc(displayNameSub) + '</div>' +
-            '<div class="walk-pill">🚶 ' + esc(displayWalk) + '</div>' +
-            '<div class="card-hours" data-spot-id="' + esc(spot.id) + '">' + buildBadgeHTML(spot) + '</div>' +
-            ratingsHTML + cuisineHTML + budgetHTML +
-            '<div class="short-desc">' + esc(shortDesc) + '</div>' +
-            '<div class="card-expand">' +
+          '<div class="card-top">' +
+            '<div class="card-info">' +
+              '<h3 class="card-name">' + esc(displayName) + '</h3>' +
+              '<div class="card-namejp">' + esc(displayNameSub) + '</div>' +
+              '<div class="walk-pill">🚶 ' + esc(displayWalk) + '</div>' +
+              '<div class="card-hours" data-spot-id="' + esc(spot.id) + '">' + buildBadgeHTML(spot) + '</div>' +
+              ratingsHTML + cuisineHTML + budgetHTML + tenantPillHTML +
+              '<div class="short-desc">' + esc(shortDesc) + '</div>' +
+            '</div>' +
+            '<div class="card-photo">' + photoHTML + '</div>' +
+          '</div>' +
+          '<div class="card-expand">' +
+            '<div style="padding:0 1rem 0.6rem">' +
               '<div class="card-desc">' + esc(displayDesc) + '</div>' +
               tipHTML +
               '<div class="card-links">' +
                 '<a class="card-link" href="' + esc(spot.googleMapsUrl) +
                 '" target="_blank" rel="noopener noreferrer">' + str.mapsLink + '</a>' +
+                websiteHTML +
                 igHTML +
               '</div>' +
+              tenantFullHTML +
             '</div>' +
           '</div>' +
           '<div class="card-footer"><button class="toggle-btn">' + str.moreBtn + '</button></div>';
@@ -870,7 +1062,7 @@
       currentFilter = filter;
 
       document.querySelectorAll('.card').forEach(function(card) {
-        var spot = window.SPOTS.find(function(s) { return s.id === card.dataset.id; });
+        var spot = window.SPOTS.find(function(sp) { return sp.id === card.dataset.id; });
         var show = !!(spot && matchesFilter(spot, filter));
 
         if (markers[card.dataset.id]) {
@@ -911,37 +1103,11 @@
         var spot = window.SPOTS.find(function(sp) { return sp.id === el.dataset.spotId; });
         if (spot) el.innerHTML = buildBadgeHTML(spot);
       });
+      document.querySelectorAll('.tenant-hours').forEach(function(el) {
+        var spot = window.SPOTS.find(function(sp) { return sp.id === el.dataset.tenantSpotId; });
+        if (spot && spot.tenant) el.innerHTML = buildBadgeHTML(spot.tenant);
+      });
     }
-
-    /* ── Language toggle ────────────────────────────────────── */
-
-    function updateStaticText() {
-      var str = s();
-      document.getElementById('nav-logo').textContent    = str.navTitle;
-      document.getElementById('lang-btn').textContent    = str.langBtn;
-      document.getElementById('list-title').textContent  = str.listTitle;
-      document.getElementById('list-sub').textContent    = str.listSub;
-      document.getElementById('list-intro').textContent  = str.listIntro;
-      document.getElementById('footer-l1').textContent   = str.footerL1;
-      document.getElementById('footer-l2').textContent   = str.footerL2;
-      var btns = document.querySelectorAll('.filter-btn');
-      btns[0].textContent = str.filterAll;
-      btns[1].textContent = str.filterTemple;
-      btns[2].textContent = str.filterLand;
-      btns[3].textContent = str.filterFood;
-      document.documentElement.lang = lang;
-    }
-
-    function setLang(newLang) {
-      lang = newLang;
-      updateStaticText();
-      renderCards(currentFilter);
-      updateNavHeight();
-    }
-
-    document.getElementById('lang-btn').addEventListener('click', function() {
-      setLang(lang === 'en' ? 'ja' : 'en');
-    });
 
     /* ── Nav height CSS variable ────────────────────────────── */
 
@@ -950,10 +1116,50 @@
       if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
     }
 
+    /* ── Lang dropdown ──────────────────────────────────────── */
+
+    var langTrigger = document.getElementById('lang-trigger');
+    var langMenu    = document.getElementById('lang-menu');
+
+    langTrigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = langMenu.classList.contains('open');
+      langMenu.classList.toggle('open', !isOpen);
+      langTrigger.setAttribute('aria-expanded', String(!isOpen));
+
+      if (!isOpen) {
+        var triggerRect = langTrigger.getBoundingClientRect();
+        if (window.innerHeight - triggerRect.bottom < 200) {
+          langMenu.style.top    = 'auto';
+          langMenu.style.bottom = 'calc(100% + 4px)';
+        } else {
+          langMenu.style.top    = 'calc(100% + 4px)';
+          langMenu.style.bottom = 'auto';
+        }
+      }
+    });
+
+    document.querySelectorAll('#lang-menu li').forEach(function(li) {
+      li.addEventListener('click', function() {
+        langMenu.classList.remove('open');
+        langTrigger.setAttribute('aria-expanded', 'false');
+        applyLanguage(li.dataset.lang);
+      });
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!document.getElementById('lang-dropdown').contains(e.target)) {
+        langMenu.classList.remove('open');
+        langTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
     /* ── Filter buttons ─────────────────────────────────────── */
 
     document.querySelectorAll('.filter-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
+        langMenu.classList.remove('open');
+        langTrigger.setAttribute('aria-expanded', 'false');
         document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         applyFilter(btn.dataset.filter);
@@ -969,7 +1175,7 @@
     });
 
     initMap();
-    renderCards('all');
+    applyLanguage(lang);
     updateAllBadges();
     setInterval(updateAllBadges, 60000);
   </script>
